@@ -1,4 +1,6 @@
-# Welcome to ASC-bla's documentation! Hello it's Natalia. 
+# Welcome to ASC-bla's documentation! 
+# Hello it's Natalia 
+
 
 
 ASC-bla is a C++ library for basic linear algebra operations.
