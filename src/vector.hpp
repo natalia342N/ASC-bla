@@ -3,18 +3,68 @@
 
 #include <iostream>
 
+#include "expression.hpp"
+
+
 namespace ASC_bla
 {
+ 
+  template <typename T, typename TDIST = std::integral_constant<size_t,1> >
+  class VectorView : public VecExpr<VectorView<T,TDIST>>
+  {
+  protected:
+    T * data;
+    size_t size;
+    TDIST dist;
+  public:
+    VectorView (size_t _size, T * _data)
+      : data(_data), size(_size) { }
+    
+    VectorView (size_t _size, TDIST _dist, T * _data)
+      : data(_data), size(_size), dist(_dist) { }
+    
+    template <typename TB>
+    VectorView & operator= (const VecExpr<TB> & v2)
+    {
+      for (size_t i = 0; i < size; i++)
+        data[dist*i] = v2(i);
+      return *this;
+    }
+
+    VectorView & operator= (T scal)
+    {
+      for (size_t i = 0; i < size; i++)
+        data[dist*i] = scal;
+      return *this;
+    }
+    
+    auto View() const { return VectorView(size, dist, data); }
+    size_t Size() const { return size; }
+    T & operator()(size_t i) { return data[dist*i]; }
+    const T & operator()(size_t i) const { return data[dist*i]; }
+    
+    auto Range(size_t first, size_t next) const {
+      return VectorView(next-first, dist, data+first*dist);
+    }
+
+    auto Slice(size_t first, size_t slice) const {
+      return VectorView<T,size_t> (size/slice, dist*slice, data+first*dist);
+    }
+      
+  };
+  
+  
+
   
   template <typename T>
-  class Vector
+  class Vector : public VectorView<T>
   {
-    size_t size;
-    T * data;
-    
+    typedef VectorView<T> BASE;
+    using BASE::size;
+    using BASE::data;
   public:
-    Vector (size_t _size) 
-      : size(_size), data(new T[size]) { ; }
+    Vector (size_t size) 
+      : VectorView<T> (size, new T[size]) { ; }
     
     Vector (const Vector & v)
       : Vector(v.Size())
@@ -23,14 +73,22 @@ namespace ASC_bla
     }
 
     Vector (Vector && v)
-      : size(0), data(nullptr)
+      : VectorView<T> (0, nullptr)
     {
       std::swap(size, v.size);
       std::swap(data, v.data);
     }
 
-    ~Vector () { delete [] data; }
+    template <typename TB>
+    Vector (const VecExpr<TB> & v)
+      : Vector(v.Size())
+    {
+      *this = v;
+    }
     
+    ~Vector () { delete [] data; }
+
+    using BASE::operator=;
     Vector & operator=(const Vector & v2)
     {
       for (size_t i = 0; i < size; i++)
@@ -44,24 +102,11 @@ namespace ASC_bla
       std::swap(data, v2.data);
       return *this;
     }
-    
-    size_t Size() const { return size; }
-    T & operator()(size_t i) { return data[i]; }
-    const T & operator()(size_t i) const { return data[i]; }
   };
 
 
-  template <typename T>
-  Vector<T> operator+ (const Vector<T> & a, const Vector<T> & b)
-  {
-    Vector<T> sum(a.Size());
-    for (size_t i = 0; i < a.Size(); i++)
-      sum(i) = a(i)+b(i);
-    return sum;
-  }
-  
-  template <typename T>
-  std::ostream & operator<< (std::ostream & ost, const Vector<T> & v)
+  template <typename ...Args>
+  std::ostream & operator<< (std::ostream & ost, const VectorView<Args...> & v)
   {
     if (v.Size() > 0)
       ost << v(0);
