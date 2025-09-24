@@ -3,3 +3,6 @@ target_sources (demo_vector PUBLIC ../src/vector.hpp)
 
 add_executable (demo_matrix demo_matrix.cpp)
 target_sources (demo_matrix PUBLIC ../src/matrix.hpp)
+
+add_executable (demo_vector_expr demo_vector_expr.cpp)
+target_sources (demo_vector PUBLIC ../src/vector_expr.hpp ../src/expression.hpp)
