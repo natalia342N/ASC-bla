@@ -69,6 +69,10 @@ namespace ASC_bla
       ost << ", " << v(i);
     return ost;
   }
+
+
+  // to do : mixed-type vector addition
+  // typedef decltype(std::declval<TA>()+std::declval<TB>()) TRES;
   
 }
 

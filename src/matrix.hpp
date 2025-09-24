@@ -4,6 +4,8 @@
 #include <iostream>
 #include "vector.hpp"  
 
+#include <cstddef> 
+
 // solve this again 
 
 namespace ASC_bla
@@ -42,6 +44,8 @@ namespace ASC_bla
 
     template <typename T, ORDERING ORD>
     Matrix<T,ORD> Transpose(const Matrix<T,ORD>& /*A*/);
+
+    // to do : swap,add, scale rows, Gauss Jordan alg 
 
     } 
     #endif
